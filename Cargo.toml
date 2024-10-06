@@ -4,11 +4,12 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-llama-cpp-2 = {path = "llama-cpp-rs/llama-cpp-2"}
+llama-cpp-2 = {path = "llama-cpp-rs/llama-cpp-2", features = ["cuda"]}
 hf-hub = "0.3.2"
 clap = { version = "4.5.19", features = ["derive"] }
 anyhow = "1.0.89"
 encoding_rs = "0.8.34"
+log = "0.4.22"
 
 [features]
 cuda = ["llama-cpp-2/cuda"]

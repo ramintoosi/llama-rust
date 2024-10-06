@@ -804,6 +804,7 @@ dependencies = [
  "encoding_rs",
  "hf-hub",
  "llama-cpp-2",
+ "log",
 ]
 
 [[package]]
