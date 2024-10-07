@@ -101,6 +101,10 @@ pub struct Args {
         help = "size of the prompt context (default: loaded from the model)"
     )]
     pub ctx_size: Option<NonZeroU32>,
+    
+    /// verbosity
+    #[clap(short = 'v', long, action)]
+    pub verbose: bool,
 
 }
 

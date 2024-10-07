@@ -10,7 +10,8 @@ use llama_cpp_2::model::{AddBos, LlamaModel, Special};
 use llama_cpp_2::model::params::LlamaModelParams;
 use llama_cpp_2::token::data_array::LlamaTokenDataArray;
 use std::sync::Arc;
-
+use std::time::Duration;
+use llama_cpp_2::ggml_time_us;
 use super::args_handler::{Args, Mode};
 
 pub struct LLM {
@@ -20,6 +21,7 @@ pub struct LLM {
     mode: Mode,
     history: String,
     max_token: i32,
+    verbose: bool,
 }
 
 impl LLM {
@@ -74,6 +76,7 @@ impl LLM {
             mode: args.mode,
             history: String::new(),
             max_token: args.max_token,
+            verbose: args.verbose,
         }
 
         
@@ -98,9 +101,7 @@ impl LLM {
 
         let n_cxt = ctx.n_ctx() as i32;
         let max_token = self.max_token;
-        // let max_token = args.max_token;
 
-        // eprintln!("n_len = {max_token}, n_ctx = {n_cxt}, k_kv_req = {n_kv_req}");
 
         // make sure the KV cache is big enough to hold all the prompt and generated tokens
         if max_token > n_cxt {
@@ -133,9 +134,9 @@ either reduce n_len or increase n_ctx"
         // main loop
 
         let mut n_cur = batch.n_tokens();
-        let mut _n_decode = 0;
+        let mut n_decode = 0;
 
-        // let t_main_start = ggml_time_us();
+        let t_main_start = ggml_time_us();
 
         // The `Decoder`
         let mut decoder = encoding_rs::UTF_8.new_decoder();
@@ -173,28 +174,29 @@ either reduce n_len or increase n_ctx"
 
             ctx.decode(&mut batch).expect("failed to eval");
 
-            _n_decode += 1;
+            n_decode += 1;
         }
 
         let llm_output_formatted = format!("{}<|eot_id|>", llm_output);
 
         self.history.push_str(llm_output_formatted.as_str());
-        llm_output
+        
 
-        // eprintln!("\n");
-        //
-        // let t_main_end = ggml_time_us();
-        //
-        // let duration = Duration::from_micros((t_main_end - t_main_start) as u64);
-        //
-        // eprintln!(
-        //     "decoded {} tokens in {:.2} s, speed {:.2} t/s\n",
-        //     n_decode,
-        //     duration.as_secs_f32(),
-        //     n_decode as f32 / duration.as_secs_f32()
-        // );
-        //
-        // println!("{}", ctx.timings());
+        
+        let t_main_end = ggml_time_us();
+        
+        let duration = Duration::from_micros((t_main_end - t_main_start) as u64);
+        
+        if self.verbose{
+            eprintln!(
+                "\n[decoded {} tokens in {:.2} s, speed {:.2} t/s]",
+                n_decode,
+                duration.as_secs_f32(),
+                n_decode as f32 / duration.as_secs_f32()
+            );
+        }
+
+        llm_output
 
         }
 
