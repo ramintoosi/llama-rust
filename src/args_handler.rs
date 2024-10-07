@@ -79,7 +79,7 @@ pub struct Args {
     pub n_gpu_layers: u32,
 
     /// set the seed for the RNG
-    #[clap(short = 's', long, default_value_t=561371, help = "RNG seed (default: 1234)")]
+    #[clap(short = 's', long, default_value_t=561371)]
     pub seed: u32,
 
     /// number of threads to use during generation
@@ -102,7 +102,7 @@ pub struct Args {
     )]
     pub ctx_size: Option<NonZeroU32>,
     
-    /// verbosity
+    /// show the token/s speed at the end of each turn
     #[clap(short = 'v', long, action)]
     pub verbose: bool,
 
