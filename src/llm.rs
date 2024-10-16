@@ -83,21 +83,28 @@ impl LLM {
     }
     
     pub fn generate_chat(&mut self, ctx: &mut LlamaContext, prompt: &str) -> String {
-
         
-
-
-        let input_formatted = format!("<|start_header_id|>user<|end_header_id|>{}<|eot_id|><|start_header_id|>assistant<|end_header_id|>", prompt);
-
-        self.history.push_str(input_formatted.as_str());
-
-
+        
+        // format the input
+        let mut flag_chat = false;
+        let input_to_model = match self.mode {
+            Mode::Chat => {
+                let input_formatted = format!("<|start_header_id|>user<|end_header_id|>{}<|eot_id|><|start_header_id|>assistant<|end_header_id|>", prompt);
+                self.history.push_str(input_formatted.as_str());
+                flag_chat = true;
+                &self.history
+            }
+            Mode::Completion => {
+                &format!("<|begin_of_text|>{}", prompt)
+            }
+        };
+        
         // tokenize the prompt
         // TODO: do not tokenize the prompt every time, add to the end of the token list
 
         let tokens_list = ctx.model
-            .str_to_token(&self.history, AddBos::Never)
-            .expect(format!("failed to tokenize {}", self.history).as_str());
+            .str_to_token(&input_to_model, AddBos::Never)
+            .expect(format!("failed to tokenize {}", input_to_model).as_str());
 
         let n_cxt = ctx.n_ctx() as i32;
         let max_token = self.max_token;
@@ -127,6 +134,10 @@ either reduce n_len or increase n_ctx"
             let is_last = i == last_index;
             batch.add(token, i as i32, &[0], is_last).unwrap();
         }
+        
+        // keeping the cache keeps the tokens in memory for the next decode
+        // I don't want this behaviour for the completion mode
+        ctx.clear_kv_cache();
 
         ctx.decode(&mut batch)
             .expect("llama_decode() failed");
@@ -178,9 +189,10 @@ either reduce n_len or increase n_ctx"
         }
 
         let llm_output_formatted = format!("{}<|eot_id|>", llm_output);
-
-        self.history.push_str(llm_output_formatted.as_str());
         
+        if flag_chat {
+            self.history.push_str(llm_output_formatted.as_str());
+        }
 
         
         let t_main_end = ggml_time_us();
