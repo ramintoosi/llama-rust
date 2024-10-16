@@ -1,5 +1,4 @@
 use anyhow::{anyhow, Context};
-use std::num::NonZeroU32;
 use std::path::PathBuf;
 use clap::{Parser, Subcommand};
 use hf_hub::api::sync::ApiBuilder;
@@ -64,7 +63,7 @@ pub struct Args {
 
     /// set the length of the prompt + output in tokens
     #[clap(long, default_value_t = 512)]
-    pub max_token: i32,
+    pub max_token: u32,
 
     /// override some parameters of the model
     #[clap(short = 'o', value_parser = parse_key_val)]
@@ -94,13 +93,13 @@ pub struct Args {
     )]
     pub threads_batch: Option<i32>,
 
-    /// size of the prompt context
-    #[clap(
-        short = 'c',
-        long,
-        help = "size of the prompt context (default: loaded from the model)"
-    )]
-    pub ctx_size: Option<NonZeroU32>,
+    // /// size of the prompt context
+    // #[clap(
+    //     short = 'c',
+    //     long,
+    //     help = "size of the prompt context (default: loaded from the model)"
+    // )]
+    // pub ctx_size: Option<NonZeroU32>,
     
     /// show the token/s speed at the end of each turn
     #[clap(short = 'v', long, action)]

@@ -20,7 +20,7 @@ pub struct LLM {
     pub ctx_params: LlamaContextParams,
     mode: Mode,
     history: String,
-    max_token: i32,
+    max_token: u32,
     verbose: bool,
 }
 
@@ -59,8 +59,9 @@ impl LLM {
         ));
 
         // initialize the context
+        
         let mut ctx_params = LlamaContextParams::default()
-            .with_n_ctx(args.ctx_size.or(Some(NonZeroU32::new(2048).unwrap())))
+            .with_n_ctx(NonZeroU32::new(args.max_token))
             .with_seed(args.seed);
         if let Some(threads) = args.threads {
             ctx_params = ctx_params.with_n_threads(threads);
@@ -109,22 +110,12 @@ impl LLM {
         let n_cxt = ctx.n_ctx() as i32;
         let max_token = self.max_token;
 
-
-        // make sure the KV cache is big enough to hold all the prompt and generated tokens
-        if max_token > n_cxt {
-            panic!(
-                "n_kv_req > n_ctx, the required kv cache size is not big enough
-either reduce n_len or increase n_ctx"
-            )
-        }
-
         if tokens_list.len() >= max_token as usize{
-            panic!("the prompt is too long, it has more tokens than max_token")
+            panic!("the prompt is too long, it has more tokens than max_token ({max_token})")
         }
 
 
         // create a llama_batch with size ctx_size
-
         // we use this object to submit token data for decoding
         let mut batch = LlamaBatch::new(n_cxt as usize, 1);
 
@@ -154,7 +145,7 @@ either reduce n_len or increase n_ctx"
 
         let mut llm_output = String::new();
 
-        while n_cur <= self.max_token {
+        while n_cur <= self.max_token as i32 {
             // sample the next token
             let candidates = ctx.candidates();
 
