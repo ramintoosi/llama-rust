@@ -5,6 +5,9 @@
 This project aims to provide a simple implementation 
 of a language model interface using Rust and the `llama.cpp` library.
 
+## Blog Post
+For more details and insights, please read my [blog post](https://ramintoosi.ir/posts/2024/10/blog-post-2/)
+
 ## Features
 
 - **Chat Mode**: Interact with the model in a conversational manner.
@@ -16,7 +19,7 @@ of a language model interface using Rust and the `llama.cpp` library.
 
 1. Clone the repository:
     ```sh
-    git clone https://github.com/ramintoosi/llama-rust
+    git clone --recursive https://github.com/ramintoosi/llama-rust
     cd llama-rust
     ```
 
