@@ -2,7 +2,7 @@
 
 ---
 
-This project is a work in progress. It aims to provide a simple implementation 
+This project aims to provide a simple implementation 
 of a language model interface using Rust and the `llama.cpp` library.
 
 ## Features
